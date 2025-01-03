@@ -70,130 +70,64 @@ class AnimatedChild extends AnimatedWidget {
       toggleChildren!();
     }
 
-    Widget buildLabel() {
-      if (label == null && labelWidget == null) return Container();
-
-      if (labelWidget != null) {
-        return GestureDetector(
+    Widget buildContent() {
+      return Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x17000000),
+              offset: Offset(0, 6),
+              blurRadius: 6,
+              spreadRadius: 0,
+            ),
+            BoxShadow(
+              color: Color(0x0D000000),
+              offset: Offset(0, 13),
+              blurRadius: 8,
+              spreadRadius: 0,
+            ),
+          ],
+        ),
+        child: InkWell(
           onTap: performAction,
           onLongPress: onLongPress == null ? null : () => performAction(true),
-          child: labelWidget,
-        );
-      }
-
-      const borderRadius = BorderRadius.all(Radius.circular(6.0));
-      return Padding(
-        padding: childMargin,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: labelBackgroundColor ??
-                (dark ? Colors.grey[800] : Colors.grey[50]),
-            borderRadius: borderRadius,
-            boxShadow: labelShadow ??
-                [
-                  BoxShadow(
-                    color: dark
-                        ? Colors.grey[900]!.withOpacity(0.7)
-                        : Colors.grey.withOpacity(0.7),
-                    offset: const Offset(0.8, 0.8),
-                    blurRadius: 2.4,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (child != null)
+                  SizedBox(
+                    height: buttonSize.height,
+                    width: buttonSize.width,
+                    child: child,
                   ),
-                ],
-          ),
-          child: Material(
-            type: MaterialType.transparency,
-            borderRadius: borderRadius,
-            clipBehavior: Clip.hardEdge,
-            child: InkWell(
-              onTap: performAction,
-              onLongPress:
-                  onLongPress == null ? null : () => performAction(true),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  vertical: 5.0,
-                  horizontal: 8.0,
-                ),
-                child: Text(label!, style: labelStyle),
-              ),
+                if (label != null || labelWidget != null)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 12),
+                    child: labelWidget ?? Text(
+                      label!,
+                      style: labelStyle ?? TextStyle(
+                        fontSize: 16,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+              ],
             ),
           ),
         ),
       );
     }
 
-    Widget button = ScaleTransition(
-        scale: animation,
-        child: FloatingActionButton(
-          key: btnKey,
-          heroTag: heroTag,
-          onPressed: performAction,
-          backgroundColor:
-              backgroundColor ?? (dark ? Colors.grey[800] : Colors.grey[50]),
-          foregroundColor:
-              foregroundColor ?? (dark ? Colors.white : Colors.black),
-          elevation: elevation ?? 6.0,
-          shape: shape,
-          child: child,
-        ));
-
-    List<Widget> children = [
-      if (label != null || labelWidget != null)
-        ScaleTransition(
-          scale: animation,
-          child: Container(
-            padding: (child == null)
-                ? const EdgeInsets.symmetric(vertical: 8)
-                : null,
-            key: (child == null) ? btnKey : null,
-            child: buildLabel(),
-          ),
-        ),
-      if (child != null)
-        Container(
-          padding: childPadding,
-          height: buttonSize.height,
-          width: buttonSize.width,
-          child: (onLongPress == null)
-              ? button
-              : FittedBox(
-                  child: GestureDetector(
-                    onLongPress: () => performAction(true),
-                    child: button,
-                  ),
-                ),
-        )
-    ];
-
-    Widget buildColumnOrRow(bool isColumn,
-        {CrossAxisAlignment? crossAxisAlignment,
-        MainAxisAlignment? mainAxisAlignment,
-        required List<Widget> children,
-        MainAxisSize? mainAxisSize}) {
-      return isColumn
-          ? Column(
-              mainAxisSize: mainAxisSize ?? MainAxisSize.max,
-              mainAxisAlignment: mainAxisAlignment ?? MainAxisAlignment.start,
-              crossAxisAlignment:
-                  crossAxisAlignment ?? CrossAxisAlignment.center,
-              children: children,
-            )
-          : Row(
-              mainAxisSize: mainAxisSize ?? MainAxisSize.max,
-              mainAxisAlignment: mainAxisAlignment ?? MainAxisAlignment.start,
-              crossAxisAlignment:
-                  crossAxisAlignment ?? CrossAxisAlignment.center,
-              children: children,
-            );
-    }
-
     return visible
         ? Container(
             margin: margin,
-            child: buildColumnOrRow(
-              useColumn,
-              mainAxisSize: MainAxisSize.min,
-              children:
-                  switchLabelPosition ? children.reversed.toList() : children,
+            child: ScaleTransition(
+              scale: animation,
+              child: buildContent(),
             ),
           )
         : Container();
